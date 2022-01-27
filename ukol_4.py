@@ -1,16 +1,46 @@
+import json
 import line_snapper
+import argparse
 
-#coordinates =[[ -742188.6592558697, -1059396.3564614803 ],[ -742185.1865536831, -1059399.8291636668 ],[ -742171.9574453533, -1059422.6494780332 ],[ -742151.782932654, -1059454.3995980248 ],[ -742145.8297289051, -1059459.6913013533 ],[ -742138.5537243225, -1059464.65220448 ],[ -742129.2932184935, -1059467.298106145 ],[ -742118.7099118307, -1059468.6210069768 ],[ -742099.527499754, -1059466.305905521 ],[ -742078.3607864268, -1059461.0142021887 ],[ -742045.2878656052, -1059452.7459969819 ],[ -742027.0976541527, -1059449.7693951093 ],[ -742013.2071454078, -1059449.7693951093 ],[ -741998.6080362163, -1059450.7690957375 ]]
+#definovani argumentu
+parser = argparse.ArgumentParser(description="zkrátí linie")
+parser.add_argument("-f", "--file", type=str, help="zadejte název vstupního souboru")
+parser.add_argument("-o", "--out_file", type=str, help="zadejte název nově vytvořeného souboru")
+parser.add_argument("-l", "--lenght", type=int, help="zadejte maximalní požadovanou délku segmentů linií")
+args = parser.parse_args()
 
-#testovani
-delka = 8
-p1 = line_snapper.Point(0,0)
-p2 = line_snapper.Point(20,0)
-print(p1)
-seg = line_snapper.Segment(p1,p2)
-print(seg)
-line = line_snapper.Polyline(seg)
-new_line = line.divide_long_segments(delka)
-new_points = new_line.points()
-print(new_points)
-print(new_points[1][0])
+in_file = args.file
+out_file = args.out_file
+max_lenght = args.lenght
+
+#in_file = "data.geojson"
+#out_file = "new_data.geojson"
+#max_lenght = 30
+
+#nacteni dat
+with open (in_file, encoding="UTF-8") as file:
+    data = json.load(file)
+
+#aktualizace bodu, tvorici linie  
+for lines in data["features"]:
+    #nacteni souradnic bodu tvorici linii
+    coordinates = lines["geometry"]["coordinates"]
+    #definovani bodu ze souradnic
+    points = []
+    for point in coordinates:
+        points.append(line_snapper.Point(*point))
+    #vytvoreni segmentu z bodu
+    segments = []
+    for i in range(len(points)-1):
+        segment = line_snapper.Segment(points[i], points[i+1])
+        segments.append(segment)
+    #vytvoreni linie ze segmentu
+    line = line_snapper.Polyline(*segments)
+    #vytvoreni nove linie se zkracenymi segmenty
+    new_line = line.divide_long_segments(max_lenght)
+    #zapsani novych bod
+    lines["geometry"]["coordinates"] = new_line.points()
+
+#vytvoreni noveho geojsonu
+with open (out_file, "w", encoding="UTF-8") as new_file:
+    json.dump(data, new_file, indent=4)
