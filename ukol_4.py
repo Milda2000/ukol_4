@@ -5,7 +5,7 @@ import argparse
 #definovani argumentu
 parser = argparse.ArgumentParser(description="zkrátí linie")
 parser.add_argument("-f", "--file", type=str, help="zadejte název vstupního souboru")
-parser.add_argument("-o", "--out_file", type=str, help="zadejte název nově vytvořeného souboru")
+parser.add_argument("-o", "--out_file", type=str, help="zadejte název souboru, do kterého budou uloženy nové sourřadnice linií")
 parser.add_argument("-l", "--lenght", type=int, help="zadejte maximalní požadovanou délku segmentů linií")
 args = parser.parse_args()
 
@@ -13,13 +13,25 @@ in_file = args.file
 out_file = args.out_file
 max_lenght = args.lenght
 
+#in_file = "kdfslg.geojson"
+#in_file = "data_none_valid.geojson"
 #in_file = "data.geojson"
 #out_file = "new_data.geojson"
 #max_lenght = 30
 
 #nacteni dat
-with open (in_file, encoding="UTF-8") as file:
-    data = json.load(file)
+#pokud nebude soubor nalezen bude vyvolana chyba a program se ukonci 
+try:
+    with open (in_file, encoding="UTF-8") as file:
+        #pokud nebude soubor validni JSON bude vyvolana chyba a program se ukonci
+        try:
+            data = json.load(file)
+        except ValueError:
+            print("Vstupní soubor není validní JSON")
+            quit()
+except FileNotFoundError:
+    print("Vstupní soubor nebyl nalezen")
+    quit()
 
 #aktualizace bodu, tvorici linie  
 for lines in data["features"]:
