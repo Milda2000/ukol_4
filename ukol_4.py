@@ -13,12 +13,6 @@ in_file = args.file
 out_file = args.out_file
 max_lenght = args.lenght
 
-#in_file = "kdfslg.geojson"
-#in_file = "data_none_valid.geojson"
-#in_file = "data.geojson"
-#out_file = "new_data.geojson"
-#max_lenght = 30
-
 #nacteni dat
 #pokud nebude soubor nalezen bude vyvolana chyba a program se ukonci 
 try:
@@ -49,8 +43,13 @@ for lines in data["features"]:
     #vytvoreni linie ze segmentu
     line = line_snapper.Polyline(*segments)
     #vytvoreni nove linie se zkracenymi segmenty
-    new_line = line.divide_long_segments(max_lenght)
+    #list do ktereho jsou ukladany zkracene segmenty
+    container = []
+    new_line = line.divide_long_segments(max_lenght, container)
+    #promazani listu
+    container.clear()
     #zapsani novych bod
+    new_points = new_line.points()
     lines["geometry"]["coordinates"] = new_line.points()
 
 #vytvoreni noveho geojsonu

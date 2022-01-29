@@ -33,9 +33,6 @@ class Segment:
 class Polyline:
 
     def __init__(self,*segments):
-        #segments = []
-        #for i in range(len(points)-1):
-        #    segments.append(Segment(points[i],points[i+1]))
         self.segments = segments
     
     def addSegment(segment):
