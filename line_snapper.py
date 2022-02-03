@@ -16,6 +16,13 @@ class Segment:
         self.p1 = p1
         self.p2 = p2
     
+    #funkce spocita delku segmentu
+    def length(self):
+        x = self.p2.x - self.p1.x 
+        y = self.p2.y - self.p1.y
+        length = math.sqrt(x**2 + y**2)
+        return length
+
     #funkce rozdeli segment na pul a vrati polylinii
     def divide(self, max_value):
         start_point = Point(self.p1.x, self.p1.y)
@@ -35,17 +42,10 @@ class Polyline:
     def __init__(self,*segments):
         self.segments = segments
     
-    def addSegment(segment):
-        pass
-
-    #funkce spocita delku segmentu a popr. na ne zavola funkci divide
-    def divide_long_segments(self, max_value, container = []):
+    #funkce zjisti delku segmentu a popr. na ni zavola funkci divide
+    def divide_long_segments(self, max_value, container):
         for seg in self.segments:
-            x = seg.p2.x - seg.p1.x 
-            y = seg.p2.y - seg.p1.y
-            lenght = math.sqrt(x**2 + y**2)
-       
-            if lenght > max_value:
+            if seg.length() > max_value:
                 new_line = seg.divide(max_value)
                 new_line.divide_long_segments(max_value, container)
             else:

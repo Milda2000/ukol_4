@@ -4,14 +4,14 @@ import argparse
 
 #definovani argumentu
 parser = argparse.ArgumentParser(description="zkrátí linie")
-parser.add_argument("-f", "--file", type=str, help="zadejte název vstupního souboru")
-parser.add_argument("-o", "--out_file", type=str, help="zadejte název souboru, do kterého budou uloženy nové sourřadnice linií")
-parser.add_argument("-l", "--lenght", type=int, help="zadejte maximalní požadovanou délku segmentů linií")
+parser.add_argument("-f", "--file", type=str, required=True, help="zadejte název vstupního souboru")
+parser.add_argument("-o", "--out_file", type=str, required=True, help="zadejte název souboru, do kterého budou uloženy nové sourřadnice linií")
+parser.add_argument("-l", "--lenght", type=int, required=True, help="zadejte maximalní požadovanou délku segmentů linií")
 args = parser.parse_args()
 
 in_file = args.file
 out_file = args.out_file
-max_lenght = args.lenght
+max_length = args.lenght
 
 #nacteni dat
 #pokud nebude soubor nalezen bude vyvolana chyba a program se ukonci 
@@ -45,7 +45,7 @@ for lines in data["features"]:
     #vytvoreni nove linie se zkracenymi segmenty
     #list do ktereho jsou ukladany zkracene segmenty
     container = []
-    new_line = line.divide_long_segments(max_lenght, container)
+    new_line = line.divide_long_segments(max_length)
     #promazani listu
     container.clear()
     #zapsani novych bod
@@ -54,4 +54,8 @@ for lines in data["features"]:
 
 #vytvoreni noveho geojsonu
 with open (out_file, "w", encoding="UTF-8") as new_file:
-    json.dump(data, new_file, indent=4)
+    try:
+        json.dump(data, new_file, indent=4)
+    except TypeError:
+        print("Nový soubor se nepovedlo zapsat")
+        quit()
