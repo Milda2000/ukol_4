@@ -26,6 +26,8 @@ try:
 except FileNotFoundError:
     print("Vstupní soubor nebyl nalezen")
     quit()
+except PermissionError:
+    print("Program nemá přístup ke vstupnímu souboru")
 
 #aktualizace bodu, tvorici linie  
 for lines in data["features"]:
@@ -43,19 +45,19 @@ for lines in data["features"]:
     #vytvoreni linie ze segmentu
     line = line_snapper.Polyline(*segments)
     #vytvoreni nove linie se zkracenymi segmenty
-    #list do ktereho jsou ukladany zkracene segmenty
-    container = []
     new_line = line.divide_long_segments(max_length)
-    #promazani listu
-    container.clear()
     #zapsani novych bod
     new_points = new_line.points()
     lines["geometry"]["coordinates"] = new_line.points()
 
 #vytvoreni noveho geojsonu
-with open (out_file, "w", encoding="UTF-8") as new_file:
-    try:
-        json.dump(data, new_file, indent=4)
-    except TypeError:
-        print("Nový soubor se nepovedlo zapsat")
-        quit()
+try:
+    with open (out_file, "w", encoding="UTF-8") as new_file:
+        try:
+            json.dump(data, new_file, indent=4)
+        except TypeError:
+            print("Nový soubor se nepovedlo zapsat")
+            quit()
+except PermissionError:
+    print("Nový soubor se nepovedlo zapsat.")
+    quit()

@@ -7,7 +7,7 @@ class Point:
         self.y = y
 
     def __str__(self):
-        return f'[ {self.x}, {self.y} ]'
+        return f'[{self.x}, {self.y}]'
 
 
 class Segment:
@@ -23,16 +23,22 @@ class Segment:
         length = math.sqrt(x**2 + y**2)
         return length
 
-    #funkce rozdeli segment na pul a vrati polylinii
-    def divide(self, max_value):
+    #funkce rozdeli segment na pul tolikrat, dokud nebude jeho delka mensi nebo rovna max. delce
+    #a vrati seznam zkracenych segmentu
+    def divide(self, max_value, container):
         start_point = Point(self.p1.x, self.p1.y)
         end_point = Point(self.p2.x, self.p2.y)
-        midx =  (start_point.x + end_point.x)/2
-        midy =  (start_point.y + end_point.y)/2
-        pmid = Point(midx,midy)
-        new_seg_1 = Segment(start_point,pmid)
-        new_seg_2 = Segment(pmid, end_point)
-        return Polyline(new_seg_1,new_seg_2)
+        if self.length() > max_value:
+            midx =  (start_point.x + end_point.x)/2
+            midy =  (start_point.y + end_point.y)/2
+            pmid = Point(midx,midy)
+            new_seg_1 = Segment(start_point,pmid)
+            new_seg_1.divide(max_value,container)
+            new_seg_2 = Segment(pmid,end_point)
+            new_seg_2.divide(max_value,container)
+        else:
+           container.append(self)
+        return container
 
     def __str__(self):
         return f'[{self.p1}, {self.p2}]'
@@ -42,14 +48,11 @@ class Polyline:
     def __init__(self,*segments):
         self.segments = segments
     
-    #funkce zjisti delku segmentu a popr. na ni zavola funkci divide
-    def divide_long_segments(self, max_value, container):
+    #funkce projde vsechny segmenty linii a zavola na ne funkci divide
+    def divide_long_segments(self, max_value):
+        container = []
         for seg in self.segments:
-            if seg.length() > max_value:
-                new_line = seg.divide(max_value)
-                new_line.divide_long_segments(max_value, container)
-            else:
-                container.append(seg)
+            seg.divide(max_value, container)
         return Polyline(*container)
 
     #funkce vrati list bodu ze ktrerych se skladaji segmenty, ktere tovri polylinii
